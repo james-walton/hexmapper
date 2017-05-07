@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link href='https://fonts.googleapis.com/css?family=Noto+Serif' rel='stylesheet' type='text/css'>
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+			font-family: 'Noto Serif', serif;
+		}
+		
+		#drawing {
+			height: 100vh;
+		}
+		
+		.paletteHex {
+			position: absolute;
+		}
+
+		.hexLabel {
+			line-height: 10px;
+			font-size: 10px;
+			position: absolute;
+			cursor: default;
+			-webkit-touch-callout: none; /* iOS Safari */
+			    -webkit-user-select: none; /* Safari */
+			     -khtml-user-select: none; /* Konqueror HTML */
+			       -moz-user-select: none; /* Firefox */
+			        -ms-user-select: none; /* Internet Explorer/Edge */
+			            user-select: none; /* Non-prefixed version, currently
+			                                  supported by Chrome and Opera */		}
+	</style>
+
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.1/svg.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+</head>
+<body ondragstart="return false;" ondrop="return false;">
+	<div id="drawing"></div>
+
+	<script type="text/javascript">
+		var draw = SVG('drawing');
+
+		var zeroHexPos = [50, 50];
+		var hexRadius = 25;
+		var colCount = 20;
+		var rowCount = 20;
+
+		var offsetX = (hexRadius * 1.5);
+		var offsetY = (Math.sqrt(3)/2 * hexRadius);
+		var paletteColor = 'white';
+		var hexes = [];
+		var mapHexes = [];
+
+		//main hex grid
+		for (var y = 0; y < rowCount; y++) {
+			for (var x = 0; x < colCount; x++) {
+				hexes[x] = [zeroHexPos[0] + (offsetX * x), zeroHexPos[1] + (offsetY * (x & 1)) + (offsetY * y * 2) ];
+				mapHexes[x, y] = drawHex(hexes[x], hexRadius);
+				mapHexes[x, y].on('mousedown', function(e) { if (e.buttons == 1) this.fill({ color: paletteColor }); });
+				mapHexes[x, y].on('mouseover', function(e) { if (e.buttons == 1) this.fill({ color: paletteColor }); });
+
+				//var hexLabel = draw.plain(x + "," + y).move((zeroHexPos[0] + (offsetX * x) - 6), (zeroHexPos[1] + (offsetY * (x & 1)) + (offsetY * y * 2) - 6));
+				
+				var hexLabel = document.createElement("div");
+		  		hexLabel.innerText = String.fromCharCode(65 + x) + y;
+		  		hexLabel.style = "left: " + (zeroHexPos[0] + (offsetX * x) - 6) + "px; top: " + (zeroHexPos[1] + (offsetY * (x & 1)) + (offsetY * y * 2) - 6) + "px;"
+		  		hexLabel.classList.add("hexLabel");
+		  		hexLabel.setAttribute("ondragstart", "return false;");
+		  		hexLabel.setAttribute("ondrop", "return false;");
+		  		document.body.appendChild(hexLabel); 
+
+			}
+		}
+
+		DrawPalette();
+
+		function DrawPalette() {
+			//palette hexes
+			var blankBrush = drawHex([1000, 50], 25); 
+			blankBrush.on('click', function() { paletteColor = 'white'; });
+
+	  		var blankBrushLabel = document.createElement("div");
+	  		blankBrushLabel.innerText = "Clear";
+	  		blankBrushLabel.style = "position: absolute; left: 1025px; top: 50px;"
+	  		document.body.appendChild(blankBrushLabel); 
+
+			var arcticBrush = drawHex([1000, 150], 25, "#ddddff"); 
+			arcticBrush.on('click', function() { paletteColor = '#ddddff'; });
+	  		
+	  		var arcticBrushLabel = document.createElement("div");
+	  		arcticBrushLabel.innerText = "Arctic";
+	  		arcticBrushLabel.style = "position: absolute; left: 1025px; top: 150px;"
+	  		document.body.appendChild(arcticBrushLabel); 
+
+			var coastalBrush = drawHex([1000, 200], 25, "wheat");
+			coastalBrush.on('click', function() { paletteColor = 'wheat'; });
+
+	  		var coastalBrushLabel = document.createElement("div");
+	  		coastalBrushLabel.innerText = "Coastal";
+	  		coastalBrushLabel.style = "position: absolute; left: 1025px; top: 200px;"
+	  		document.body.appendChild(coastalBrushLabel); 
+
+			var desertBrush = drawHex([1000, 250], 25, "tan");
+			desertBrush.on('click', function() { paletteColor = 'tan'; });			
+
+	  		var desertBrushLabel = document.createElement("div");
+	  		desertBrushLabel.innerText = "Desert";
+	  		desertBrushLabel.style = "position: absolute; left: " + (desertBrush.x() + desertBrush.width()) + "px; top: " + (desertBrush.y() + (desertBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(desertBrushLabel); 
+
+			var forestBrush = drawHex([1000, 300], 25, "green");
+			forestBrush.on('click', function() { paletteColor = 'green'; });			
+
+	  		var forestBrushLabel = document.createElement("div");
+	  		forestBrushLabel.innerText = "Forest";
+	  		forestBrushLabel.style = "position: absolute; left: " + (forestBrush.x() + forestBrush.width()) + "px; top: " + (forestBrush.y() + (forestBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(forestBrushLabel); 
+
+			var grasslandBrush = drawHex([1000, 350], 25, "lightgreen");
+			grasslandBrush.on('click', function() { paletteColor = 'lightgreen'; });			
+
+	  		var grasslandBrushLabel = document.createElement("div");
+	  		grasslandBrushLabel.innerText = "Grassland";
+	  		grasslandBrushLabel.style = "position: absolute; left: " + (grasslandBrush.x() + grasslandBrush.width()) + "px; top: " + (grasslandBrush.y() + (grasslandBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(grasslandBrushLabel); 
+
+			var hillBrush = drawHex([1000, 400], 25, "#A37C59");
+			hillBrush.on('click', function() { paletteColor = '#A37C59'; });			
+
+	  		var hillBrushLabel = document.createElement("div");
+	  		hillBrushLabel.innerText = "Hill";
+	  		hillBrushLabel.style = "position: absolute; left: " + (hillBrush.x() + hillBrush.width()) + "px; top: " + (hillBrush.y() + (hillBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(hillBrushLabel); 
+
+			var mountainBrush = drawHex([1000, 450], 25, "#A53C0E");
+			mountainBrush.on('click', function() { paletteColor = '#A53C0E'; });			
+
+	  		var mountainBrushLabel = document.createElement("div");
+	  		mountainBrushLabel.innerText = "Mountain";
+	  		mountainBrushLabel.style = "position: absolute; left: " + (mountainBrush.x() + mountainBrush.width()) + "px; top: " + (mountainBrush.y() + (mountainBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(mountainBrushLabel); 
+
+			var swampBrush = drawHex([1000, 500], 25, "mediumaquamarine");
+			swampBrush.on('click', function() { paletteColor = 'mediumaquamarine'; });			
+
+	  		var swampBrushLabel = document.createElement("div");
+	  		swampBrushLabel.innerText = "Swamp";
+	  		swampBrushLabel.style = "position: absolute; left: " + (swampBrush.x() + swampBrush.width()) + "px; top: " + (swampBrush.y() + (swampBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(swampBrushLabel); 
+
+			var waterBrush = drawHex([1000, 550], 25, "royalblue");
+			waterBrush.on('click', function() { paletteColor = 'royalblue'; });			
+
+	  		var waterBrushLabel = document.createElement("div");
+	  		waterBrushLabel.innerText = "Water";
+	  		waterBrushLabel.style = "position: absolute; left: " + (waterBrush.x() + waterBrush.width()) + "px; top: " + (waterBrush.y() + (waterBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(waterBrushLabel); 
+
+			var urbanBrush = drawHex([1000, 600], 25, "silver");
+			urbanBrush.on('click', function() { paletteColor = 'silver'; });			
+
+	  		var urbanBrushLabel = document.createElement("div");
+	  		urbanBrushLabel.innerText = "Urban";
+	  		urbanBrushLabel.style = "left: " + (urbanBrush.x() + urbanBrush.width()) + "px; top: " + (urbanBrush.y() + (urbanBrush.height() / 2)) + "px;"
+	  		document.body.appendChild(urbanBrushLabel); 
+
+			var cbShowHexLabels = document.createElement('input');
+			cbShowHexLabels.id = "cbShowHexLabels";
+			cbShowHexLabels.type = "checkbox";
+			cbShowHexLabels.setAttribute ("checked", "checked");
+			cbShowHexLabels.style = "position: absolute; left: 975px; top: 650px"; 
+			// cbShowHexLabels.on("checkedchanged", "if (this.attr("checked") = "checked") 
+
+			var cbShowHexLabelsLabel = document.createElement('label')
+			cbShowHexLabelsLabel.htmlFor = "cbShowHexLabels";
+			cbShowHexLabelsLabel.appendChild(document.createTextNode('Show Hex Labels'));
+			cbShowHexLabelsLabel.style = "position: absolute; left: 1025px; top: 650px"; 
+
+			document.body.appendChild(cbShowHexLabels);
+			document.body.appendChild(cbShowHexLabelsLabel);
+
+	  	}
+
+		function drawHex (center, radius, fillColor = "white", borderColor = "black", borderWidth = 1 ) {
+
+			var hexCorners = [
+				hex_corner(center, radius, 1),
+				hex_corner(center, radius, 2),
+				hex_corner(center, radius, 3),
+				hex_corner(center, radius, 4),
+				hex_corner(center, radius, 5),
+				hex_corner(center, radius, 6),
+			];
+
+			var polygon = draw.polygon().stroke({ width: borderWidth, color: borderColor }).fill({ color: 'white' });
+			polygon.fill({ color: fillColor });
+			polygon.plot(hexCorners);
+
+			return polygon;
+
+		}
+
+		function hex_corner(centerPoint, size, i) {
+			var angle_deg = 60 * i;  
+			var angle_rad = Math.PI / 180 * angle_deg;
+			return [(centerPoint[0] + size * Math.cos(angle_rad)), (centerPoint[1] + size * Math.sin(angle_rad))];
+		}
+
+		
+	</script>
+
+	</body>
+</html>   
